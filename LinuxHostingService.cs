@@ -10,35 +10,19 @@ using Serilog;
 
 namespace SampleLinuxService {
     public class LinuxHostingService : IHostedService {
-        IApplicationLifetime appLifetime;
-        //ILogger<LinuxHostingService> logger;
-        IHostingEnvironment environment;
+        IHostApplicationLifetime appLifetime;
+        ILogger<LinuxHostingService> _logger;
+        IHostEnvironment environment;
         IConfiguration configuration;
         
 
         public LinuxHostingService (IConfiguration configuration,
-                                    IHostingEnvironment environment,
+                                    IHostEnvironment environment,
                                     ILogger<LinuxHostingService> logger,
-                                    IApplicationLifetime appLifetime
+                                    IHostApplicationLifetime appLifetime
                                     ) {
             this.configuration = configuration;
-            
-            
-            //this.logger = logger;
-            
-
-            //Log.Logger = new LoggerConfiguration();
-            LoggerConfiguration lc = new LoggerConfiguration();
-            lc.WriteTo.Console();
-            lc.WriteTo.File ("C:\\temp\\log.txt");
-            //lc.CreateLogger();
-            Log.Logger = lc.CreateLogger();
-
-            
-            //Log.Logger = new LoggerConfiguration().CreateLogger();
-            
-            
-
+            this._logger = logger;
             this.appLifetime = appLifetime;
             this.environment = environment;
 
@@ -53,7 +37,7 @@ namespace SampleLinuxService {
             Console.WriteLine("Value from AppSettings.json:  [FromAppSettingBase:setting1] = " + globalSetting1);
 
 
-            // C:  Retrieve a setting originall defined in appsettings.json file, but also exists in appsettings.[environment].json file.
+            // C:  Retrieve a setting originally defined in appsettings.json file, but also exists in appsettings.[environment].json file.
             //     Will contain value from the environment version of the appsettings file.
             //     Value should be "Second"
             string overriddenSetting = configuration.GetValue<string> ("WillBeOverridden");
@@ -72,12 +56,24 @@ namespace SampleLinuxService {
 
 
         public Task StartAsync (CancellationToken cancellationToken) {
-            Log.Information("StartAsync method called.");
-//            this.logger.LogInformation ("StartAsync method called.");
+            _logger.LogInformation("StartAsync method called!");
+            _logger.LogDebug("Debugging log statement.");
 
-            this.appLifetime.ApplicationStarted.Register (OnStarted);
-            this.appLifetime.ApplicationStopping.Register (OnStopping);
-            this.appLifetime.ApplicationStopped.Register (OnStopped);
+
+            // E:  Log with parameters that will be indexable on backends.
+            string firstName = "George";
+            string lastName = "Jetson";      
+            _logger.LogInformation("Ooops {firstName} did it again {lastName}.", firstName, lastName);
+
+            // F:  Log with Event ID
+            EventId x = new EventId(500,"Bad");
+            _logger.LogCritical(x,"Oh NOOOOO!");
+
+
+
+            appLifetime.ApplicationStarted.Register (OnStarted);
+            appLifetime.ApplicationStopping.Register (OnStopping);
+            appLifetime.ApplicationStopped.Register (OnStopped);
 
             return Task.CompletedTask;
 
@@ -85,24 +81,21 @@ namespace SampleLinuxService {
 
 
         private void OnStarted () {
-            Log.Information("OnStarted called.");
-            //this.logger.LogInformation ("OnStarted method called.");
+            _logger.LogInformation("OnStarted Method started.");
 
             // Post-startup code goes here  
         }
 
 
         private void OnStopping () {
-            Log.Information ("OnStopped method called");
-            //this.logger.LogInformation ("OnStopping method called.");
+            _logger.LogInformation("OnStopped method called");
+            
 
             // On-stopping code goes here  
         }
 
         private void OnStopped() {
-            Log.Information ("OnStopped method called");
-            Log.CloseAndFlush();
-                //this.logger.LogInformation("OnStopped method called.");
+            _logger.LogInformation("OnStopped method called");
 
             // Post-stopped code goes here  
         }
@@ -110,10 +103,11 @@ namespace SampleLinuxService {
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            Log.Information("StopAsync method called");
-            //this.logger.LogInformation("StopAsync method called.");
+            _logger.LogInformation("StopAsync method called");
+            //this._logger.LogInformation("StopAsync method called.");
 
             
+
             return Task.CompletedTask;
         }
     }

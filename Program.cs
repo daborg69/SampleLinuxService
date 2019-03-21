@@ -26,30 +26,18 @@ namespace SampleLinuxService
     ///  - [C, D] It will read settings from an AppSettings.Development.json file using a JSON file reader [D].  Any settings with the same
     ///    name that existed in the non environment specific AppSettings.Json file will be overriden with the value from the environment
     ///    specific version.  See Example C:
-    ///  
+    ///  - Logging:  All logging is configured from the appsettings.development.json file.
+    ///  - It will log to 3 sinks at the moment (It is important that the Name parameter of the WriteTo setting specifies the exact sink type or else
+    ///    the config will not load properly.  So the name: RollingFile is not a symbolic name, but rather the actual name of the sink provider RollingFile.  
+    ///    * Console.
+    ///    * A rolling log file - RollingFile
+    ///    * A permanent log file - File
     /// </summary>
     class Program
     {
-/*        public static Action<IConfigurationBuilder> BuildConfig = builder => builder
-                                                                             .SetBasePath(Directory.GetCurrentDirectory())
-                                                                             .AddJsonFile("hostsettings.json", optional: true)
-                                                                             .AddEnvironmentVariables(prefix: "ASPNETCORE_");
-                                                                             */
+
         static async Task Main(string[] args)
         {
-/*
-            var builder = new ConfigurationBuilder();
-            BuildConfig (builder);
-
-            builder.AddCommandLine (args);
-            Log.Logger = new LoggerConfiguration().ReadFrom.Configuration (builder.Build()).WriteTo.Console().CreateLogger();
-
-            builder
-            */
-
-
-
-
             IHost host = new HostBuilder()
                             // TODO Not sure we need this first ConfigureHostConfiguration as its interface is deprecated and it just passes its values onto the ConfigureAppConfiguration parameters anyway.
                                      .ConfigureHostConfiguration(configHost =>
@@ -68,30 +56,32 @@ namespace SampleLinuxService
                                          configApp.AddEnvironmentVariables(prefix: "SAMPLE_");
                                          configApp.AddCommandLine(args);
                                      })
+                                    .ConfigureLogging((hostContext, configLogging) =>
+                                    {
+                                        configLogging.AddSerilog(new LoggerConfiguration()
+                                                                 .ReadFrom.Configuration(hostContext.Configuration)
+                                                                 .CreateLogger());
+// We NEVER want to log to Console in production - well at least if it is an API or Web app we do not - it will kill performance.
+#if DEBUG
+                                        configLogging.AddConsole();
+                                        configLogging.AddDebug();
+#endif                                        
+                                    })
+
+
                                      .ConfigureServices((hostContext, services) =>
                                      {
                                          services.AddLogging();
                                          services.AddHostedService<LinuxHostingService>();
                                      })
                                      
-                                     .ConfigureLogging((hostContext, configLogging) =>
-                                     {
-    
-    
-                                         configLogging.AddSerilog(new LoggerConfiguration()
-    
-                                                                  .ReadFrom.Configuration(hostContext.Configuration)
-                                                                  .CreateLogger());
-    
-                                         configLogging.AddConsole();
-                                         configLogging.AddDebug();
-                                     })
-                                     
 
                                      .Build();
     
                         await host.RunAsync();
-                        Console.ReadKey();
-        }
+                        Console.WriteLine("Flushing logs");
+                        Log.CloseAndFlush();
+            Console.ReadKey();
+         }
     }
 }
