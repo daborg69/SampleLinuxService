@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "SampleLinuxService": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "SAMPLE_DB": "ADatabaseConnection",
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
+    }
+  }
+}
