@@ -59,7 +59,7 @@ namespace SampleLinuxService
 
 // We NEVER want to log to Console in production - well at least if it is an API or Web app we do not - it will kill performance.
 #if DEBUG
-				                 configLogging.AddConsole();
+				                 //configLogging.AddConsole();
 				                 configLogging.AddDebug();
 #endif
 			                 })

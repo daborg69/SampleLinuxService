@@ -14,10 +14,10 @@ namespace SampleLinuxService {
 	/// unlogged and hidden errors.
 	/// </summary>
     public class LinuxHostingService : IHostedService {
-        IHostApplicationLifetime appLifetime;
+        IHostApplicationLifetime _appLifetime;
         ILogger<LinuxHostingService> _logger;
-        IHostEnvironment environment;
-        IConfiguration configuration;
+        IHostEnvironment _environment;
+        IConfiguration _configuration;
         
 
         public LinuxHostingService (IConfiguration configuration,
@@ -26,30 +26,30 @@ namespace SampleLinuxService {
                                     IHostApplicationLifetime appLifetime
                                     ) {
 	        try {
-		        this.configuration = configuration;
+		        this._configuration = configuration;
 		        this._logger = logger;
-		        this.appLifetime = appLifetime;
-		        this.environment = environment;
+		        this._appLifetime = appLifetime;
+		        this._environment = environment;
 
 
-		        // A:  Retrieve an environment variable
+		        // A:  Retrieve an _environment variable
 		        string sampleDB = configuration.GetValue<string>("DB");
 		        Console.WriteLine("Environment variable [SAMPLE_DB] = " + sampleDB);
 
 
-		        // B:  Retrieve a config variable from the appsettings.json file - the non environment specific one.
+		        // B:  Retrieve a config variable from the appsettings.json file - the non _environment specific one.
 		        string globalSetting1 = configuration.GetValue<string>("FromAppSettingBase:setting1");
 		        Console.WriteLine("Value from AppSettings.json:  [FromAppSettingBase:setting1] = " + globalSetting1);
 
 
-		        // C:  Retrieve a setting originally defined in appsettings.json file, but also exists in appsettings.[environment].json file.
-		        //     Will contain value from the environment version of the appsettings file.
+		        // C:  Retrieve a setting originally defined in appsettings.json file, but also exists in appsettings.[_environment].json file.
+		        //     Will contain value from the _environment version of the appsettings file.
 		        //     Value should be "Second"
 		        string overriddenSetting = configuration.GetValue<string>("WillBeOverridden");
 		        Console.WriteLine("Overridden Value from appsettings.development.json:  [WillBeOverridden] = " + overriddenSetting);
 
 
-		        // D:  Retrieve a setting only defined in the environment specific version of the file - appsettings.development.json file.
+		        // D:  Retrieve a setting only defined in the _environment specific version of the file - appsettings.development.json file.
 		        string onlyInDev = configuration.GetValue<string>("UniqueToDevelopment");
 		        Console.WriteLine("Value only defined in appsettings.development.json file:  [UniqueToDevelopment] = " + onlyInDev);
 
@@ -80,9 +80,9 @@ namespace SampleLinuxService {
 
 
 
-            appLifetime.ApplicationStarted.Register (OnStarted);
-            appLifetime.ApplicationStopping.Register (OnStopping);
-            appLifetime.ApplicationStopped.Register (OnStopped);
+            _appLifetime.ApplicationStarted.Register (OnStarted);
+            _appLifetime.ApplicationStopping.Register (OnStopping);
+            _appLifetime.ApplicationStopped.Register (OnStopped);
 
             return Task.CompletedTask;
 
