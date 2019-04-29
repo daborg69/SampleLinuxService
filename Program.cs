@@ -14,6 +14,11 @@ namespace SampleLinuxService
     /// <summary>
     /// This program is a sample app that shows how to use the HostBuilder to setup and run a service oriented application. Below the square brackets
     /// indicate where in the program this is demonstrated (Mostly in the LinuxHostingService class).
+    /// There are now 2 services running in the sample:
+    ///    LinuxHostingService and
+    ///    SampleBackgroundService.
+    /// For most projects going forward you will want to use SampleBackgroundService as the template.
+    /// 
     /// It demonstrates the following things:
     ///  - You must have the environment variable  ASPNETCORE_ENVIRONMENT = development set in order for it to read the appsettings.development.json file.
     ///    * In production this would be set to Production to read an appsettings.production.json file.
@@ -66,7 +71,8 @@ namespace SampleLinuxService
 			                 .ConfigureServices((hostContext, services) => {
 				                 services.AddLogging();
 				                 services.AddHostedService<LinuxHostingService>();
-			                 })
+                                 services.AddHostedService<SampleBackgroundService>();
+                             })
 			                 .Build();
 
 			    await host.RunAsync();

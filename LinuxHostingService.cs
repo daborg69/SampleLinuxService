@@ -54,9 +54,19 @@ namespace SampleLinuxService {
 		        Console.WriteLine("Value only defined in appsettings.development.json file:  [UniqueToDevelopment] = " + onlyInDev);
 
 		        // Retrieve an Appsettings variable
-
 		        string connection = configuration.GetValue<string>("SampleDB:Connection");
-	        }
+
+                // Retrieve SeriLog:MinimumLevel
+                string serilogVal = configuration.GetValue<string> ("Serilog:MinimumLevel");
+                Console.WriteLine("Serilog Min Level = " + serilogVal);
+
+                // Retrieve SeriLog:First Write To Name
+                string serilogVal2 = configuration.GetValue<string>("Serilog:WriteTo:0:Name");
+                Console.WriteLine("Serilog WriteTo Name = " + serilogVal2);
+
+
+
+            }
 	        catch ( Exception e ) {
 		        string message = "Unexpected error occurred in the application: " + environment.ApplicationName;
 				_logger.LogCritical(e,"This was an unhandled error.");
